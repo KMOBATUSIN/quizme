@@ -1,152 +1,114 @@
-// add variables that keep track of the quiz "state"
 let currentQuestionIndex = 0;
 let time = questions.length * 15;
 let timerId;
 
-// add variables to reference DOM elements
-// example is below
-let questionsEl = document.getElementById('questions');
+let questionsEl = document.querySelector('#questions');
+let optionsEl = document.querySelector('#choices');
+let timer = document.querySelector('#time');
+let startButton = document.querySelector("#start");
+let addInitials = document.querySelector("#initials");
+let submitButton = document.querySelector("#submit");
+let feedbackEl = document.querySelector("#feedback");
 
-
-// reference the sound effects
 let sfxRight = new Audio('assets/sfx/correct.wav');
 let sfxWrong = new Audio('assets/sfx/incorrect.wav');
 
 function startQuiz() {
-  // hide start screen
+  let hideScreen = document.getElementById("start-screen");
+  hideScreen.setAttribute("class", "hide");
 
+  questionsEl.removeAttribute("class");
 
-  // un-hide questions section
+  timerId = setInterval(clockTick, 1000);
+  timer.textContent = time;
 
-  // start timer
-
-  // show starting time
-
-  // call a function to show the next question
   getQuestion();
 }
 
 function getQuestion() {
-  // get current question object from array
+  let presentQuestion = questions[currentQuestionIndex];
 
-  // update title with current question
+  let updateTitle = document.getElementById("question-title");
+  updateTitle.textContent = presentQuestion.title;
 
-  // clear out any old question choices
+  optionsEl.innerHTML = ""; // Corrected the typo from innerHtml to innerHTML
 
-  // loop over the choices for each question
-  // get the number of questions
-  let numberOfQuestions; // assign it the value of the length of the questions array
-  for (let i = 0; i < numberOfQuestions; i++) {
+  let numberOfChoices = presentQuestion.choices.length;
+  for (let i = 0; i < numberOfChoices; i++) {
+    const choiceButton = document.createElement("button");
+    choiceButton.textContent = presentQuestion.choices[i];
+    choiceButton.setAttribute("value", presentQuestion.choices[i]);
 
-    // create a new button for each choice, setting the label and value for the button
-
-    // display the choice button on the page
-
+    choiceButton.onclick = questionClick;
+    optionsEl.appendChild(choiceButton);
   }
 }
 
-function questionClick(event) {
-  // identify the targeted button that was clicked on
+function questionClick(clickedButton) {
+  if (clickedButton.target.value !== questions[currentQuestionIndex].answer) { 
+    time -= 15;
+    if (time < 0) {
+      time = 0;
+    }
+    timer.textContent = time;
+    feedbackEl.textContent = "Wrong!";
+    sfxWrong.play(); 
+  } else {
+    feedbackEl.textContent = "Correct!";
+    sfxRight.play(); 
+  }
 
-  // if the clicked element is not a choice button, do nothing.
+  
+  feedbackEl.removeAttribute("class");
+  
+  setTimeout(function () {
+      feedbackEl.setAttribute("class", "feedback hide");
+    },500);
+  
 
-
-  // check if user guessed wrong
-  // if () {
-  // if they got the answer wrong, penalize time by subtracting 15 seconds from the timer
-  // recall the timer is the score they get at the end
-
-  // if they run out of time (i.e., time is less than zero) set time to zero so we can end quiz
-
-
-  // display new time on page
-
-  // play "wrong" sound effect
-
-  // display "wrong" feedback on page
-
-} else {
-  // play "right" sound effect
-
-  // display "right" feedback on page by displaying the text "Correct!" in the feedback element
-
+  currentQuestionIndex++;
+  if (currentQuestionIndex === questions.length) {
+    quizEnd();
+  } else {
+    getQuestion();
+  }
 }
-// flash right/wrong feedback on page for half a second
-// set the feedback element to have the class of "feedback"
 
-
-// after one second, remove the "feedback" class from the feedback element
-
-// move to next question
-currentQuestionIndex++;
-
-// check if we've run out of questions
-// if the time is less than zero and we have reached the end of the questions array,
-// call a function that ends the quiz (quizEnd function)
-// or else get the next question
-
-
-// define the steps of the QuizEnd function...when the quiz ends...
 function quizEnd() {
-  // stop the timer
-
-  // show end screen
-
-  // show final score
-
-  // hide the "questions" section
+  clearInterval(timerId);
+  let quizEndEl = document.getElementById("end-screen");
+  quizEndEl.removeAttribute("class");
+  let finalScoreEl = document.getElementById("final-score");
+  finalScoreEl.textContent = time;
+  questionsEl.setAttribute("class", "hide");
 }
 
-// add the code in this function to update the time, it should be called every second
 function clockTick() {
-  // right here - update time
-
-  // update the element to display the new time value
-
-  // check if user ran out of time; if so, call the quizEnd() function
-
+  time--;
+  timer.innerHTML = time;
+  if (time <= 0) {
+    quizEnd();
+  }
 }
 
-// complete the steps to save the high score
 function saveHighScore() {
-
-  // get the value of the initials input box
-
-  // make sure the value of the initials input box wasn't empty
-
-  // if it is not, check and see if there is a value of high scores in local storage
-
-  // if there isn't any, then create a new array to store the high score
-
-  // add the new initials and high score to the array
-
-  // convert the array to a piece of text
-
-  // store the high score in local storage
-
-  // otherwise, if there are high scores stored in local storage,
-  // retrieve the local storage value that has the high scores,
-  // convert it back to an array,
-  // add the new initials and high score to the array,
-  // then convert the array back to a piece of text,
-  // then store the new array (converted to text) back in local storage
-
-  // finally, redirect the user to the high scores page.
-
+  let user = addInitials.value; 
+  if (user !== "") {
+    let highscores = JSON.parse(window.localStorage.getItem('highscores')) || [];
+    let newHighScore = { Initials: user, Score: time }; 
+    highscores = highscores.concat(newHighScore);
+    let textHighScores = JSON.stringify(highscores);
+    window.localStorage.setItem("highscores", textHighScores); 
+    window.location.href = "highscore.html"; 
+  }
 }
 
-// use this function when the user presses the "enter" key when submitting high score initials
 function checkForEnter(event) {
-  // if the user presses the enter key, then call the saveHighscore function
+  if (event.key === "Enter") { 
+    saveHighScore();
+  }
 }
 
-// user clicks button to submit initials
-submitBtn.onclick = saveHighScore;
-
-// user clicks button to start quiz
-startBtn.onclick = startQuiz;
-
-// user clicks on an element containing choices
-choicesEl.onclick = questionClick;
-
-initialsEl.onkeyup = checkForEnter;
+submitButton.onclick = saveHighScore;
+startButton.onclick = startQuiz;
+addInitials.onkeyup = checkForEnter;
