@@ -2,9 +2,9 @@ let currentQuestionIndex = 0;
 let time = questions.length * 15;
 let timerId;
 
-let questionsEl = document.querySelector('#questions');
-let optionsEl = document.querySelector('#choices');
-let timer = document.querySelector('#time');
+let questionsEl = document.querySelector("#questions");
+let optionsEl = document.querySelector("#choices");
+let timer = document.querySelector("#time");
 let startButton = document.querySelector("#start");
 let addInitials = document.querySelector("#initials");
 let submitButton = document.querySelector("#submit");
@@ -31,7 +31,7 @@ function getQuestion() {
   let updateTitle = document.getElementById("question-title");
   updateTitle.textContent = presentQuestion.title;
 
-  optionsEl.innerHTML = ""; // Corrected the typo from innerHtml to innerHTML
+  optionsEl.innerHTML = ""; 
 
   let numberOfChoices = presentQuestion.choices.length;
   for (let i = 0; i < numberOfChoices; i++) {
@@ -95,13 +95,15 @@ function saveHighScore() {
   let user = addInitials.value; 
   if (user !== "") {
     let highscores = JSON.parse(window.localStorage.getItem('highscores')) || [];
-    let newHighScore = { Initials: user, Score: time }; 
+    let newHighScore = { initials: user, score: time }; 
     highscores = highscores.concat(newHighScore);
     let textHighScores = JSON.stringify(highscores);
     window.localStorage.setItem("highscores", textHighScores); 
-    window.location.href = "highscore.html"; 
+    user = "";
+    window.location.href = "highscores.html"; 
   }
 }
+
 
 function checkForEnter(event) {
   if (event.key === "Enter") { 
